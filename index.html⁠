@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classroom Hub - ม.3/2</title>
+    <!-- Tailwind CSS & FontAwesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; }
+        .hide { display: none !important; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 border border-slate-100">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl font-bold shadow-inner">
+                    <i class="fa-solid fa-school"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-slate-900">ห้องเรียน ม.3/2</h1>
+                <p class="text-slate-500 text-sm">กรุณาเลือกรายชื่อเพื่อเข้าสู่ระบบ</p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">เลือกรายชื่อของคุณ</label>
+                    <select id="loginStudentSelect" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 text-slate-700">
+                        <option value="">-- เลือกรายชื่อนักเรียน (38 คน) --</option>
+                    </select>
+                </div>
+                <button onclick="handleLogin()" class="w-full py-3.5 bg-indigo-600 text-white font-semibold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition">
+                    เข้าสู่ระบบ
+                </button>
+                <div class="text-center pt-2 border-t border-slate-100">
+                    <button onclick="openAdminLoginModal()" class="text-xs text-slate-400 hover:text-indigo-600 font-medium transition">
+                        <i class="fa-solid fa-lock mr-1"></i> เข้าสู่ระบบแอดมิน
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="mainApp" class="flex-1 flex flex-col hide">
+        <!-- HEADER -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-bold text-lg shadow-md shadow-indigo-100">
+                        M
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-slate-900 leading-tight">มัธยมศึกษาปีที่ 3/2</h2>
+                        <span id="headerRoleBadge" class="text-xs px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full font-medium">นักเรียน</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                    <!-- Profile Widget -->
+                    <div onclick="openProfileModal()" class="flex items-center space-x-2 bg-slate-100 hover:bg-slate-200 transition px-3 py-1.5 rounded-full cursor-pointer">
+                        <img id="navUserAvatar" src="" class="w-7 h-7 rounded-full object-cover border border-white bg-slate-300" alt="Avatar">
+                        <span id="navUserName" class="text-sm font-medium text-slate-700 max-w-[120px] truncate">ชื่อเล่น</span>
+                    </div>
+                    <!-- Admin Toggle Button -->
+                    <button id="adminToggleBtn" onclick="toggleAdminMode()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-medium transition flex items-center space-x-1">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span class="hidden sm:inline" id="adminBtnText">โหมดแอดมิน</span>
+                    </button>
+                    <button onclick="logout()" class="p-2 text-slate-400 hover:text-rose-600 transition" title="ออกจากระบบ">
+                        <i class="fa-solid fa-right-from-bracket text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- NAVIGATION TABS -->
+        <nav class="bg-white border-b border-slate-100 shadow-xs">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1 overflow-x-auto py-2">
+                <button onclick="switchTab('fund')" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold text-indigo-600 bg-indigo-50 transition flex items-center space-x-2 shrink-0" data-tab="fund">
+                    <i class="fa-solid fa-wallet"></i><span>คลังเงินห้อง</span>
+                </button>
+                <button onclick="switchTab('homework')" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition flex items-center space-x-2 shrink-0" data-tab="homework">
+                    <i class="fa-solid fa-book-open"></i><span>การบ้าน & ส่งงาน</span>
+                </button>
+                <button onclick="switchTab('lostfound')" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition flex items-center space-x-2 shrink-0" data-tab="lostfound">
+                    <i class="fa-solid fa-box-archive"></i><span>ตามของหาย</span>
+                </button>
+                <button onclick="switchTab('announcement')" class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition flex items-center space-x-2 shrink-0" data-tab="announcement">
+                    <i class="fa-solid fa-bullhorn"></i><span>กระดานประกาศ</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- CONTENT AREA -->
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            
+            <!-- TAB 1: FUND & CLASS FEE -->
+            <div id="tab-fund" class="space-y-6">
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-xl font-bold">
+                            <i class="fa-solid fa-sack-dollar"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase">เงินห้องคงเหลือสุทธิ</p>
+                            <h3 id="netFundBalance" class="text-2xl font-bold text-slate-800">0 บาท</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl font-bold">
+                            <i class="fa-solid fa-arrow-trend-up"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase">ยอดเก็บสะสมรวม</p>
+                            <h3 id="totalCollected" class="text-2xl font-bold text-slate-800">0 บาท</h3>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center text-xl font-bold">
+                            <i class="fa-solid fa-arrow-trend-down"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase">เบิกเงินรวม</p>
+                            <h3 id="totalWithdrawn" class="text-2xl font-bold text-slate-800">0 บาท</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Weekly Fee Tracking (10 Baht/Week) -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">ระบบเช็คชื่อ & ทวงค่าห้องรายสัปดาห์ (สัปดาห์ละ 10 บาท)</h3>
+                            <p class="text-xs text-slate-500">เลือกสัปดาห์เพื่อตรวจสอบหรือบันทึกสถานะการชำระเงินของสมาชิกทั้ง 38 คน</p>
+                        </div>
+                        <!-- Week Selector -->
+                        <div class="flex items-center space-x-2">
+                            <label class="text-xs font-semibold text-slate-600">สัปดาห์ที่:</label>
+                            <select id="feeWeekSelect" onchange="renderFeeTable()" class="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-indigo-600 focus:outline-none">
+                                <!-- Generated by JS 1-16 -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Fee Status Summary for Selected Week -->
+                    <div class="bg-indigo-50/50 rounded-xl p-4 mb-4 flex flex-wrap items-center justify-between gap-4 border border-indigo-100">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                            <span class="text-sm font-medium text-slate-700">ชำระแล้ว: <strong id="paidCount" class="text-emerald-600">0</strong> คน</span>
+                            <span class="w-3 h-3 rounded-full bg-rose-500 ml-4"></span>
+                            <span class="text-sm font-medium text-slate-700">ค้างชำระ: <strong id="unpaidCount" class="text-rose-600">38</strong> คน</span>
+                        </div>
+                        <div class="text-sm font-semibold text-indigo-900">
+                            ยอดเงินสัปดาห์นี้: <span id="weekTotalAmount" class="text-indigo-600 text-base">0</span> บาท
+                        </div>
+                    </div>
+
+                    <!-- Students Fee Table -->
+                    <div class="overflow-x-auto rounded-xl border border-slate-100">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                    <th class="p-3.5 text-center w-16">เลขที่</th>
+                                    <th class="p-3.5">ชื่อ -สกุล</th>
+                                    <th class="p-3.5">ชื่อเล่น</th>
+                                    <th class="p-3.5 text-center">สถานะค่าห้อง (10 บาท)</th>
+                                    <th class="p-3.5 text-center admin-only hide">จัดการ (แอดมิน)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="feeTableBody" class="divide-y divide-slate-100 text-sm">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Section: Withdrawal Records -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">รายการเบิกเงินห้อง</h3>
+                            <p class="text-xs text-slate-500">บันทึกประวัติการเบิกจ่ายเงินสำหรับกิจกรรมห้องเรียน</p>
+                        </div>
+                        <button onclick="openWithdrawModal()" class="admin-only hide px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-md transition flex items-center space-x-1.5">
+                            <i class="fa-solid fa-plus text-xs"></i><span>เบิกเงิน</span>
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-xs font-bold text-slate-500 uppercase">
+                                    <th class="p-3">วันที่ / เวลา</th>
+                                    <th class="p-3">รายการเบิก</th>
+                                    <th class="p-3 text-right">จำนวนเงิน (บาท)</th>
+                                    <th class="p-3">ผู้เบิก</th>
+                                    <th class="p-3 text-center admin-only hide w-16">ลบ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="withdrawTableBody" class="divide-y divide-slate-100 text-sm">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: HOMEWORK -->
+            <div id="tab-homework" class="space-y-6 hide">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-900">สรุปการบ้าน & กำหนดส่งงาน</h3>
+                        <p class="text-xs text-slate-500">เช็ครายการการบ้านวิชาต่างๆ และกำหนดส่งประจำวัน</p>
+                    </div>
+                    <button onclick="openHomeworkModal()" class="admin-only hide px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-md transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-plus text-xs"></i><span>เพิ่มการบ้านใหม่</span>
+                    </button>
+                </div>
+                <!-- Homework Cards Grid -->
+                <div id="homeworkGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- TAB 3: LOST & FOUND -->
+            <div id="tab-lostfound" class="space-y-6 hide">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-900">บอร์ดตามของหาย / ของลืมในห้อง</h3>
+                        <p class="text-xs text-slate-500">โพสต์ตามหาของหรือแจ้งของที่พบในห้องเรียน</p>
+                    </div>
+                    <button onclick="openLostModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-md transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-plus text-xs"></i><span>แจ้งของหาย / พบของ</span>
+                    </button>
+                </div>
+                <!-- Lost Items Grid -->
+                <div id="lostGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- TAB 4: ANNOUNCEMENTS -->
+            <div id="tab-announcement" class="space-y-6 hide">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-900">กระดานประกาศห้องเรียน</h3>
+                        <p class="text-xs text-slate-500">ประกาศสำคัญจากหัวหน้าห้องหรือครูประจำชั้น</p>
+                    </div>
+                    <button onclick="openAnnouncementModal()" class="admin-only hide px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-md transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-plus text-xs"></i><span>สร้างประกาศใหม่</span>
+                    </button>
+                </div>
+                <div id="announcementList" class="space-y-4">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- Profile Edit Modal -->
+    <div id="profileModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hide">
+        <div class="bg-white rounded-3xl shadow-xl w-full max-w-sm p-6 space-y-4">
+            <h3 class="text-lg font-bold text-slate-900">แก้ไขข้อมูลส่วนตัว</h3>
+            <div class="space-y-3">
+                <div class="text-center">
+                    <img id="modalProfilePreview" src="" class="w-20 h-20 rounded-full object-cover mx-auto mb-2 border-2 border-indigo-100 shadow-sm bg-slate-200">
+                    <label class="inline-block px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl cursor-pointer transition">
+                        <i class="fa-solid fa-camera mr-1"></i> เปลี่ยนรูปภาพ
+                        <input type="file" id="profileImageInput" accept="image/*" class="hide" onchange="previewProfileImage(event)">
+                    </label>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">ชื่อจริง (ล็อกอิน)</label>
+                    <input type="text" id="modalRealName" disabled class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">ชื่อเล่น</label>
+                    <input type="text" id="modalNicknameInput" placeholder="ระบุชื่อเล่นของคุณ" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="closeProfileModal()" class="flex-1 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-semibold text-sm hover:bg-slate-200 transition">ยกเลิก</button>
+                <button onclick="saveProfile()" class="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-700 transition">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hide">
+        <div class="bg-white rounded-3xl shadow-xl w-full max-w-sm p-6 space-y-4">
+            <h3 class="text-lg font-bold text-slate-900">เข้าสู่ระบบแอดมิน</h3>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">รหัสผ่านแอดมิน (ค่าเริ่มต้น: 1234)</label>
+                <input type="password" id="adminPasswordInput" placeholder="กรอกรหัสผ่าน" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="closeAdminLoginModal()" class="flex-1 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-semibold text-sm hover:bg-slate-200 transition">ยกเลิก</button>
+                <button onclick="verifyAdminLogin()" class="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-700 transition">ยืนยัน</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div id="withdrawModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hide">
+        <div class="bg-white rounded-3xl shadow-xl w-full max-w-sm p-6 space-y-4">
+            <h3 class="text-lg font-bold text-slate-900">บันทึกเบิกเงินห้อง</h3>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">รายการเบิก</label>
+                    <input type="text" id="withdrawTitle" placeholder="เช่น ค่าบอร์ด, ค่าอุปกรณ์ทำความสะอาด" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">จำนวนเงิน (บาท)</label>
+                    <input type="number" id="withdrawAmount" placeholder="0" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="closeWithdrawModal()" class="flex-1 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-semibold text-sm hover:bg-slate-200 transition">ยกเลิก</button>
+                <button onclick="saveWithdraw()" class="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-700 transition">บันทึกการเบิก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Homework Modal -->
+    <div id="homeworkModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hide">
+        <div class="bg-white rounded-3xl shadow-xl w-full max-w-md p-6 space-y-4">
+            <h3 class="text-lg font-bold text-slate-900">เพิ่มรายการการบ้าน</h3>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">วิชา</label>
+                    <input type="text" id="hwSubject" placeholder="เช่น คณิตศาสตร์, วิทยาศาสตร์" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">รายละเอียดงาน</label>
+                    <textarea id="hwDesc" rows="3" placeholder="ระบุรายละเอียดงานและการบ้าน..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">กำหนดส่ง</label>
+                    <input type="date" id="hwDueDate" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="closeHomeworkModal()" class="flex-1 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-semibold text-sm hover:bg-slate-200 transition">ยกเลิก</button>
+                <button onclick="saveHomework()" class="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-700 transition">บันทึกงาน</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lost & Found Modal -->
+    <div id="lostModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hide">
+        <div class="bg-white rounded-3xl shadow-xl w-full max-w-md p-6 space-y-4">
+            <h3 class="text-lg font-bold text-slate-900">แจ้งของหาย / พบของ</h3>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">ประเภท</label>
+                    <select id="lostType" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-slate-50">
+                        <option value="lost">ตามหาของหาย (ของฉันหาย)</option>
+                        <option value="found">พบของ (เก็บได้นำมาส่งคืน)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">ชื่อสิ่งของ</label>
+                    <input type="text" id="lostItemName" placeholder="เช่น หูฟังบลูทูธ, สมุดคณิตศาสตร์" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">รายละเอียด / จุดที่ลืมหรือพบ</label>
+                    <textarea id="lostDesc" rows="2" placeholder="ระบุรายละเอียดเพิ่มเติม..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+                </div>
+                <div class="text-center">
+                    <img id="lostImagePreview" src="" class="w-24 h-24 rounded-xl object-cover mx-auto mb-2 border border-slate-200 hide bg-slate-100">
+                    <label class="inline-block px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl cursor-pointer transition">
+                        <i class="fa-solid fa-image mr-1"></i> แนบรูปภาพ (ถ้ามี)
+                        <input type="file" id="lostImageInput" accept="image/*" class="hide" onchange="previewLostImage(event)">
+                    </label>
+                </div>
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="closeLostModal()" class="flex-1 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-semibold text-sm hover:bg-slate-200 transition">ยกเลิก</button>
+                <button onclick="saveLostItem()" class="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-700 transition">โพสต์แจ้ง</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Announcement Modal -->
+    <div id="announcementModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hide">
+        <div class="bg-white rounded-3xl shadow-xl w-full max-w-md p-6 space-y-4">
+            <h3 class="text-lg font-bold text-slate-900">สร้างประกาศห้องเรียน</h3>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">หัวข้อประกาศ</label>
+                    <input type="text" id="annTitle" placeholder="หัวข้อประกาศ..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">เนื้อหาประกาศ</label>
+                    <textarea id="annContent" rows="3" placeholder="รายละเอียดประกาศ..." class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+                </div>
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="closeAnnouncementModal()" class="flex-1 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-semibold text-sm hover:bg-slate-200 transition">ยกเลิก</button>
+                <button onclick="saveAnnouncement()" class="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-700 transition">โพสต์ประกาศ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // 38 Students List
+        const studentsList = [
+            "ด.ช.กฤษฎา พิศพันธ์",
+            "ด.ช.กิตติคุณ สระธรรม",
+            "ด.ช.กิตติ์นภัส แซ่เฮ้ง",
+            "ด.ช.กิตติพันธ์ ศิริรัตน์",
+            "ด.ช.ชัชชัย จันทร์อ่ำ",
+            "ด.ช.ชุติภัทร เข็มเพ็ชร",
+            "ด.ช.แทนไท หิรัญสถิต",
+            "ด.ช.นนทกร จันทร์อ่อน",
+            "ด.ช.นนทวรรธน์ จิตร์บุญ",
+            "ด.ช.บวร พรศิริ",
+            "ด.ช.ปลื้มขวัญ เปลาเร",
+            "ด.ช.พงศ์พิทักษ์ แสนเทศ",
+            "ด.ช.ภูมิหิรัญ หมื่นจร",
+            "ด.ช.ศุภวัฒน์ สงเคราะห์",
+            "ด.ช.สุทธิศักดิ์ นิลบดี",
+            "ด.ช.อริยะ เลี้ยงสอน",
+            "ด.ญ.กันยรัตน์ พิมพา",
+            "ด.ญ.กานต์นิชา บรรเทาทุกข์",
+            "ด.ญ.ขวัญข้าว สุขชี",
+            "ด.ญ.ณัชญา ถวิลรัก",
+            "ด.ญ.ณัฐนันท์ เกตุรณชัย",
+            "ด.ญ.ณิชกมล สุขศรี",
+            "ด.ญ.ดนยรัชฏ์ ภูมิตินทรีย์",
+            "ด.ญ.ธัญวรัตน์ โคกแก้ว",
+            "ด.ญ.นภสร กาญจนนุกูลศิริ",
+            "ด.ญ.นภัสสร เชาว์ไทย",
+            "ด.ญ.นัฐทิชา นุชยิ้มย่อง",
+            "ด.ญ.นันทิยา พวงมี",
+            "ด.ญ.บุศรี บุญธรรม",
+            "ด.ญ.เบญจพร สาวทรัพย์",
+            "ด.ญ.ปภาวรินทร์ ละอองบัว",
+            "ด.ญ.พิมพ์พิศา ธีรพิพัฒน์ธาดา",
+            "ด.ญ.วิภามาศ เสลานนท์",
+            "ด.ญ.วิลาสินี ชุ้นเกษา",
+            "ด.ญ.ศรัญพร พิมพ์เพชร",
+            "ด.ญ.สุชาดา เปลาเล",
+            "ด.ญ.อลิชา เสลาคุณ",
+            "ด.ญ.อัญชิสา วงษ์สนิท"
+        ];
+
+        // State variables
+        let currentUser = null; // { name, role: 'student'|'admin', nickname, avatar }
+        let db = {
+            profiles: {}, // name -> { nickname, avatar }
+            fees: {},     // week_X -> { studentName: true/false }
+            withdrawals: [], // { id, title, amount, date, by }
+            homework: [],    // { id, subject, desc, dueDate }
+            lostItems: [],   // { id, type, name, desc, image, by, date }
+            announcements: [], // { id, title, content, date, by }
+            adminPass: '1234'
+        };
+
+        // Initialize App on Load
+        window.onload = function() {
+            loadData();
+            populateLoginSelect();
+            populateWeekSelect();
+            checkSession();
+        };
+
+        function loadData() {
+            const saved = localStorage.getItem('m3_2_classroom_db');
+            if (saved) {
+                try { db = JSON.parse(saved); } catch(e) {}
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('m3_2_classroom_db', JSON.stringify(db));
+        }
+
+        function populateLoginSelect() {
+            const select = document.getElementById('loginStudentSelect');
+            select.innerHTML = '<option value="">-- เลือกรายชื่อนักเรียน (38 คน) --</option>';
+            studentsList.forEach((name, idx) => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                opt.textContent = `${idx + 1}. ${name}`;
+                select.appendChild(opt);
+            });
+        }
+
+        function populateWeekSelect() {
+            const select = document.getElementById('feeWeekSelect');
+            select.innerHTML = '';
+            for (let i = 1; i <= 16; i++) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = `สัปดาห์ที่ ${i} (เก็บ 10 บาท)`;
+                select.appendChild(opt);
+            }
+        }
+
+        function checkSession() {
+            const session = localStorage.getItem('m3_2_session');
+            if (session) {
+                try {
+                    currentUser = JSON.parse(session);
+                    document.getElementById('loginScreen').classList.add('hide');
+                    document.getElementById('mainApp').classList.remove('hide');
+                    updateUserUI();
+                    renderAllTabs();
+                } catch(e) {}
+            }
+        }
+
+        function handleLogin() {
+            const name = document.getElementById('loginStudentSelect').value;
+            if (!name) {
+                alert('กรุณาเลือกรายชื่อนักเรียนก่อนเข้าสู่ระบบ');
+                return;
+            }
+            currentUser = {
+                name: name,
+                role: 'student'
+            };
+            // load profile if exists
+            if (db.profiles[name]) {
+                currentUser.nickname = db.profiles[name].nickname || '';
+                currentUser.avatar = db.profiles[name].avatar || '';
+            } else {
+                currentUser.nickname = name.split(' ')[1] || name;
+                currentUser.avatar = '';
+            }
+
+            localStorage.setItem('m3_2_session', JSON.stringify(currentUser));
+            document.getElementById('loginScreen').classList.add('hide');
+            document.getElementById('mainApp').classList.remove('hide');
+            updateUserUI();
+            renderAllTabs();
+        }
+
+        function logout() {
+            localStorage.removeItem('m3_2_session');
+            currentUser = null;
+            document.getElementById('mainApp').classList.add('hide');
+            document.getElementById('loginScreen').classList.remove('hide');
+        }
+
+        // Admin Toggle
+        function toggleAdminMode() {
+            if (currentUser.role === 'admin') {
+                currentUser.role = 'student';
+                localStorage.setItem('m3_2_session', JSON.stringify(currentUser));
+                updateUserUI();
+                renderAllTabs();
+                alert('ออกจากโหมดแอดมินแล้ว');
+            } else {
+                openAdminLoginModal();
+            }
+        }
+
+        function openAdminLoginModal() {
+            document.getElementById('adminLoginModal').classList.remove('hide');
+            document.getElementById('adminPasswordInput').value = '';
+        }
+        function closeAdminLoginModal() {
+            document.getElementById('adminLoginModal').classList.add('hide');
+        }
+        function verifyAdminLogin() {
+            const pass = document.getElementById('adminPasswordInput').value;
+            if (pass === db.adminPass) {
+                currentUser.role = 'admin';
+                localStorage.setItem('m3_2_session', JSON.stringify(currentUser));
+                closeAdminLoginModal();
+                updateUserUI();
+                renderAllTabs();
+                alert('เข้าสู่โหมดแอดมินสำเร็จ!');
+            } else {
+                alert('รหัสผ่านแอดมินไม่ถูกต้อง!');
+            }
+        }
+
+        function updateUserUI() {
+            const isAdmin = currentUser.role === 'admin';
+            document.getElementById('headerRoleBadge').textContent = isAdmin ? 'ผู้ดูแลระบบ (Admin)' : 'นักเรียน (ม.3/2)';
+            document.getElementById('headerRoleBadge').className = isAdmin ? 'text-xs px-2.5 py-0.5 bg-amber-100 text-amber-700 rounded-full font-semibold' : 'text-xs px-2.5 py-0.5 bg-indigo-50 text-indigo-600 rounded-full font-medium';
+            
+            document.getElementById('navUserName').textContent = currentUser.nickname || currentUser.name;
+            const avatarImg = document.getElementById('navUserAvatar');
+            if (currentUser.avatar) {
+                avatarImg.src = currentUser.avatar;
+            } else {
+                avatarImg.src = 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(currentUser.name);
+            }
+
+            // Toggle admin elements
+            const adminEls = document.querySelectorAll('.admin-only');
+            adminEls.forEach(el => {
+                if (isAdmin) el.classList.remove('hide');
+                else el.classList.add('hide');
+            });
+
+            document.getElementById('adminBtnText').textContent = isAdmin ? 'ออกแอดมิน' : 'โหมดแอดมิน';
+        }
+
+        // Profile Modal
+        let tempAvatarBase64 = '';
+        function openProfileModal() {
+            document.getElementById('profileModal').classList.remove('hide');
+            document.getElementById('modalRealName').value = currentUser.name;
+            document.getElementById('modalNicknameInput').value = currentUser.nickname || '';
+            tempAvatarBase64 = currentUser.avatar || '';
+            const preview = document.getElementById('modalProfilePreview');
+            if (tempAvatarBase64) preview.src = tempAvatarBase64;
+            else preview.src = 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(currentUser.name);
+        }
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.add('hide');
+        }
+        function previewProfileImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    tempAvatarBase64 = e.target.result;
+                    document.getElementById('modalProfilePreview').src = tempAvatarBase64;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+        function saveProfile() {
+            const nickname = document.getElementById('modalNicknameInput').value.trim();
+            if (nickname) currentUser.nickname = nickname;
+            currentUser.avatar = tempAvatarBase64;
+
+            // save to db profiles
+            db.profiles[currentUser.name] = {
+                nickname: currentUser.nickname,
+                avatar: currentUser.avatar
+            };
+            saveData();
+            localStorage.setItem('m3_2_session', JSON.stringify(currentUser));
+            closeProfileModal();
+            updateUserUI();
+            renderFeeTable();
+            alert('บันทึกข้อมูลส่วนตัวเรียบร้อย');
+        }
+
+        // Tabs switching
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if (btn.dataset.tab === tabId) {
+                    btn.className = 'tab-btn px-4 py-2 rounded-xl text-sm font-semibold text-indigo-600 bg-indigo-50 transition flex items-center space-x-2 shrink-0';
+                } else {
+                    btn.className = 'tab-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition flex items-center space-x-2 shrink-0';
+                }
+            });
+            ['fund', 'homework', 'lostfound', 'announcement'].forEach(id => {
+                document.getElementById(`tab-${id}`).classList.add('hide');
+            });
+            document.getElementById(`tab-${tabId}`).classList.remove('hide');
+        }
+
+        function renderAllTabs() {
+            renderFeeTable();
+            renderWithdrawals();
+            renderHomework();
+            renderLostItems();
+            renderAnnouncements();
+        }
+
+        // --- TAB 1: FEES & FUND ---
+        function renderFeeTable() {
+            const week = document.getElementById('feeWeekSelect').value || 1;
+            const weekKey = `week_${week}`;
+            if (!db.fees[weekKey]) db.fees[weekKey] = {};
+
+            const tbody = document.getElementById('feeTableBody');
+            tbody.innerHTML = '';
+
+            let paidCount = 0;
+
+            studentsList.forEach((name, idx) => {
+                const isPaid = !!db.fees[weekKey][name];
+                if (isPaid) paidCount++;
+
+                const profile = db.profiles[name] || {};
+                const nickname = profile.nickname || '-';
+                const avatar = profile.avatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(name));
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50/80 transition';
+                tr.innerHTML = `
+                    <td class="p-3.5 text-center font-medium text-slate-500">${idx + 1}</td>
+                    <td class="p-3.5 flex items-center space-x-3">
+                        <img src="${avatar}" class="w-8 h-8 rounded-full object-cover border border-slate-200 bg-slate-100">
+                        <span class="font-medium text-slate-800">${name}</span>
+                    </td>
+                    <td class="p-3.5 text-slate-600">${nickname}</td>
+                    <td class="p-3.5 text-center">
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold ${isPaid ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+                            ${isPaid ? 'ชำระแล้ว' : 'ค้างชำระ'}
+                        </span>
+                    </td>
+                    <td class="p-3.5 text-center admin-only ${currentUser.role === 'admin' ? '' : 'hide'}">
+                        <button onclick="toggleFeeStatus('${weekKey}', '${name}')" class="px-3 py-1 rounded-lg text-xs font-semibold ${isPaid ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'} transition">
+                            ${isPaid ? 'ยกเลิกสถานะ' : 'รับเงิน'}
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('paidCount').textContent = paidCount;
+            document.getElementById('unpaidCount').textContent = 38 - paidCount;
+            document.getElementById('weekTotalAmount').textContent = paidCount * 10;
+
+            updateFundSummary();
+        }
+
+        function toggleFeeStatus(weekKey, studentName) {
+            const current = !!db.fees[weekKey][studentName];
+            db.fees[weekKey][studentName] = !current;
+            saveData();
+            renderFeeTable();
+        }
+
+        function updateFundSummary() {
+            let totalCollected = 0;
+            // Calculate total collected across all weeks 1-16
+            for (let i = 1; i <= 16; i++) {
+                const wk = `week_${i}`;
+                if (db.fees[wk]) {
+                    Object.values(db.fees[wk]).forEach(val => {
+                        if (val) totalCollected += 10;
+                    });
+                }
+            }
+
+            let totalWithdrawn = 0;
+            db.withdrawals.forEach(w => {
+                totalWithdrawn += Number(w.amount) || 0;
+            });
+
+            const net = totalCollected - totalWithdrawn;
+            document.getElementById('netFundBalance').textContent = net.toLocaleString() + ' บาท';
+            document.getElementById('totalCollected').textContent = totalCollected.toLocaleString() + ' บาท';
+            document.getElementById('totalWithdrawn').textContent = totalWithdrawn.toLocaleString() + ' บาท';
+        }
+
+        // Withdrawals
+        function openWithdrawModal() {
+            document.getElementById('withdrawModal').classList.remove('hide');
+            document.getElementById('withdrawTitle').value = '';
+            document.getElementById('withdrawAmount').value = '';
+        }
+        function closeWithdrawModal() {
+            document.getElementById('withdrawModal').classList.add('hide');
+        }
+        function saveWithdraw() {
+            const title = document.getElementById('withdrawTitle').value.trim();
+            const amount = Number(document.getElementById('withdrawAmount').value);
+            if (!title || !amount) {
+                alert('กรุณากรอกข้อมูลการเบิกให้ครบถ้วน');
+                return;
+            }
+            db.withdrawals.unshift({
+                id: Date.now(),
+                title,
+                amount,
+                date: new Date().toLocaleString('th-TH'),
+                by: currentUser.nickname || currentUser.name
+            });
+            saveData();
+            closeWithdrawModal();
+            renderWithdrawals();
+            updateFundSummary();
+        }
+        function renderWithdrawals() {
+            const tbody = document.getElementById('withdrawTableBody');
+            tbody.innerHTML = '';
+            if (db.withdrawals.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400">ยังไม่มีรายการเบิกเงินห้อง</td></tr>`;
+                return;
+            }
+            db.withdrawals.forEach(w => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition';
+                tr.innerHTML = `
+                    <td class="p-3 text-slate-500 text-xs">${w.date}</td>
+                    <td class="p-3 font-medium text-slate-800">${w.title}</td>
+                    <td class="p-3 text-right font-bold text-rose-600">-${w.amount.toLocaleString()}</td>
+                    <td class="p-3 text-slate-600 text-xs">${w.by}</td>
+                    <td class="p-3 text-center admin-only ${currentUser.role === 'admin' ? '' : 'hide'}">
+                        <button onclick="deleteWithdraw(${w.id})" class="text-slate-400 hover:text-rose-600 transition"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        function deleteWithdraw(id) {
+            if (confirm('ต้องการลบรายการเบิกนี้ใช่หรือไม่?')) {
+                db.withdrawals = db.withdrawals.filter(w => w.id !== id);
+                saveData();
+                renderWithdrawals();
+                updateFundSummary();
+            }
+        }
+
+        // --- TAB 2: HOMEWORK ---
+        function openHomeworkModal() {
+            document.getElementById('homeworkModal').classList.remove('hide');
+            document.getElementById('hwSubject').value = '';
+            document.getElementById('hwDesc').value = '';
+            document.getElementById('hwDueDate').value = '';
+        }
+        function closeHomeworkModal() {
+            document.getElementById('homeworkModal').classList.add('hide');
+        }
+        function saveHomework() {
+            const subject = document.getElementById('hwSubject').value.trim();
+            const desc = document.getElementById('hwDesc').value.trim();
+            const dueDate = document.getElementById('hwDueDate').value;
+            if (!subject || !desc) {
+                alert('กรุณากรอกวิชาและรายละเอียดงาน');
+                return;
+            }
+            db.homework.unshift({
+                id: Date.now(),
+                subject,
+                desc,
+                dueDate: dueDate || 'ไม่ระบุ',
+                by: currentUser.nickname || currentUser.name
+            });
+            saveData();
+            closeHomeworkModal();
+            renderHomework();
+        }
+        function renderHomework() {
+            const grid = document.getElementById('homeworkGrid');
+            grid.innerHTML = '';
+            if (db.homework.length === 0) {
+                grid.innerHTML = `<div class="col-span-full bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-400">ยังไม่มีรายการการบ้านในขณะนี้</div>`;
+                return;
+            }
+            db.homework.forEach(hw => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between space-y-4';
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-lg">${hw.subject}</span>
+                            <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i> กำหนดส่ง: ${hw.dueDate}</span>
+                        </div>
+                        <p class="text-slate-700 text-sm whitespace-pre-line">${hw.desc}</p>
+                    </div>
+                    <div class="flex items-center justify-between pt-3 border-t border-slate-100 text-xs text-slate-400">
+                        <span>โพสต์โดย: ${hw.by}</span>
+                        <button onclick="deleteHomework(${hw.id})" class="admin-only ${currentUser.role === 'admin' ? '' : 'hide'} text-rose-500 hover:text-rose-700 font-semibold">ลบงาน</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        function deleteHomework(id) {
+            if (confirm('ต้องการลบการบ้านนี้ใช่หรือไม่?')) {
+                db.homework = db.homework.filter(h => h.id !== id);
+                saveData();
+                renderHomework();
+            }
+        }
+
+        // --- TAB 3: LOST & FOUND ---
+        let tempLostImage = '';
+        function openLostModal() {
+            document.getElementById('lostModal').classList.remove('hide');
+            document.getElementById('lostItemName').value = '';
+            document.getElementById('lostDesc').value = '';
+            tempLostImage = '';
+            document.getElementById('lostImagePreview').classList.add('hide');
+        }
+        function closeLostModal() {
+            document.getElementById('lostModal').classList.add('hide');
+        }
+        function previewLostImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    tempLostImage = e.target.result;
+                    const prev = document.getElementById('lostImagePreview');
+                    prev.src = tempLostImage;
+                    prev.classList.remove('hide');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+        function saveLostItem() {
+            const type = document.getElementById('lostType').value;
+            const name = document.getElementById('lostItemName').value.trim();
+            const desc = document.getElementById('lostDesc').value.trim();
+            if (!name) {
+                alert('กรุณาระบุชื่อสิ่งของ');
+                return;
+            }
+            db.lostItems.unshift({
+                id: Date.now(),
+                type,
+                name,
+                desc,
+                image: tempLostImage,
+                date: new Date().toLocaleString('th-TH'),
+                by: currentUser.nickname || currentUser.name
+            });
+            saveData();
+            closeLostModal();
+            renderLostItems();
+        }
+        function renderLostItems() {
+            const grid = document.getElementById('lostGrid');
+            grid.innerHTML = '';
+            if (db.lostItems.length === 0) {
+                grid.innerHTML = `<div class="col-span-full bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-400">ไม่มีประกาศของหายหรือพบของในขณะนี้</div>`;
+                return;
+            }
+            db.lostItems.forEach(item => {
+                const isLost = item.type === 'lost';
+                const card = document.createElement('div');
+                card.className = 'bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between space-y-4';
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="px-3 py-1 ${isLost ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'} text-xs font-bold rounded-lg">
+                                ${isLost ? '<i class="fa-solid fa-magnifying-glass mr-1"></i> ตามหาของหาย' : '<i class="fa-solid fa-gift mr-1"></i> พบของ'}
+                            </span>
+                            <span class="text-xs text-slate-400">${item.date}</span>
+                        </div>
+                        <h4 class="font-bold text-slate-900 text-base mb-1">${item.name}</h4>
+                        <p class="text-slate-600 text-sm mb-3">${item.desc || 'ไม่มีรายละเอียดเพิ่มเติม'}</p>
+                        ${item.image ? `<img src="${item.image}" class="w-full h-36 object-cover rounded-xl border border-slate-100 mb-2">` : ''}
+                    </div>
+                    <div class="flex items-center justify-between pt-3 border-t border-slate-100 text-xs text-slate-400">
+                        <span>ผู้แจ้ง: ${item.by}</span>
+                        <button onclick="deleteLostItem(${item.id})" class="${currentUser.role === 'admin' || currentUser.nickname === item.by ? '' : 'hide'} text-rose-500 hover:text-rose-700 font-semibold">ลบโพสต์</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        function deleteLostItem(id) {
+            if (confirm('ต้องการลบโพสต์นี้ใช่หรือไม่?')) {
+                db.lostItems = db.lostItems.filter(i => i.id !== id);
+                saveData();
+                renderLostItems();
+            }
+        }
+
+        // --- TAB 4: ANNOUNCEMENTS ---
+        function openAnnouncementModal() {
+            document.getElementById('announcementModal').classList.remove('hide');
+            document.getElementById('annTitle').value = '';
+            document.getElementById('annContent').value = '';
+        }
+        function closeAnnouncementModal() {
+            document.getElementById('announcementModal').classList.add('hide');
+        }
+        function saveAnnouncement() {
+            const title = document.getElementById('annTitle').value.trim();
+            const content = document.getElementById('annContent').value.trim();
+            if (!title || !content) {
+                alert('กรุณากรอกหัวข้อและเนื้อหาประกาศ');
+                return;
+            }
+            db.announcements.unshift({
+                id: Date.now(),
+                title,
+                content,
+                date: new Date().toLocaleString('th-TH'),
+                by: currentUser.nickname || currentUser.name
+            });
+            saveData();
+            closeAnnouncementModal();
+            renderAnnouncements();
+        }
+        function renderAnnouncements() {
+            const list = document.getElementById('announcementList');
+            list.innerHTML = '';
+            if (db.announcements.length === 0) {
+                list.innerHTML = `<div class="bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-400">ยังไม่มีประกาศจากห้องเรียนในขณะนี้</div>`;
+                return;
+            }
+            db.announcements.forEach(ann => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-2';
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-slate-900 text-lg flex items-center">
+                            <i class="fa-solid fa-bullhorn text-indigo-600 mr-2"></i> ${ann.title}
+                        </h4>
+                        <span class="text-xs text-slate-400">${ann.date}</span>
+                    </div>
+                    <p class="text-slate-700 text-sm whitespace-pre-line pl-6">${ann.content}</p>
+                    <div class="flex items-center justify-between pt-2 pl-6 text-xs text-slate-400 border-t border-slate-50 mt-3">
+                        <span>ประกาศโดย: ${ann.by}</span>
+                        <button onclick="deleteAnnouncement(${ann.id})" class="admin-only ${currentUser.role === 'admin' ? '' : 'hide'} text-rose-500 hover:text-rose-700 font-semibold">ลบประกาศ</button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+        function deleteAnnouncement(id) {
+            if (confirm('ต้องการลบประกาศนี้ใช่หรือไม่?')) {
+                db.announcements = db.announcements.filter(a => a.id !== id);
+                saveData();
+                renderAnnouncements();
+            }
+        }
+    </script>
+</body>
+</html>
